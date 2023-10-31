@@ -1,2 +1,4 @@
 #for every inner project
 node_modules/
+build/
+dist/
