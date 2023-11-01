@@ -1,5 +1,14 @@
-const favoriteFruits: string[] = ['apple', 'strawberry', 'orange']
+import express from 'express'
 
-function addFruit(fruit: string) {
-  favoriteFruits.push(fruit)
-}
+const app = express()
+const port = process.env.PORT || 8080
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  console.log('Server listening on port ', port)
+})
+
+console.log({ express })
