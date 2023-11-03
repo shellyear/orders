@@ -30,8 +30,7 @@ function Orders() {
     : 1;
 
   useEffect(() => {
-    const pageNum = Number(pageNumber);
-    const skipAmount = currentPage > 1 ? (pageNum - 1) * limit : 0;
+    const skipAmount = currentPage > 1 ? (currentPage - 1) * limit : 0;
     setIsLoading(true);
     fetchOrders(limit, skipAmount)
       .then(({ data: { orders, total } }) => {
@@ -43,7 +42,7 @@ function Orders() {
         setIsLoading(false);
         console.error("Error fetching orders data:", err);
       });
-  }, [currentPage, limit, pageNumber, setTotal]);
+  }, [currentPage, limit, setTotal]);
 
   const TableHeaderItems = useMemo(
     () =>
