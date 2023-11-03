@@ -10,8 +10,11 @@ app.use(cors())
 
 app.get('/orders', async (req, res) => {
   try {
-    const response = await fetchAllOrders()
-    const { winstrom } = response.data
+    const limit = req.query.limit as string
+    const start = req.query.start as string
+
+    const allOrdersRes = await fetchAllOrders(limit, start)
+    const { winstrom } = allOrdersRes.data
     const ordersInfo = winstrom['objednavka-prijata'].map(
       ({ id, kod, sumCelkem }) => ({
         id,
@@ -43,7 +46,10 @@ app.get('/orders', async (req, res) => {
       ...idMap[orderDetail.id],
     }))
 
-    res.json(completeOrdersData)
+    res.json({
+      total: winstrom['@rowCount'],
+      orders: completeOrdersData
+    })
   } catch (error) {
     console.error('Error fetching data:', error)
     res.status(500).json({ error: 'Internal Server Error' })

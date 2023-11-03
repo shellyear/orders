@@ -1,3 +1,8 @@
+export type OrdersResponse = {
+  total: number
+  orders: OrderType[]
+}
+
 export type OrderType = {
     uzivatel: string;
     kod: string;

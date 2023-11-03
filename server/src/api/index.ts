@@ -9,8 +9,13 @@ const api = axios.create({
   },
 })
 
-export const fetchAllOrders = () =>
-  api.get<OrdersResponse>('/objednavka-prijata')
+export const fetchAllOrders = (limit: string, start: string) => {
+  const params = new URLSearchParams()
+  params.append('limit', limit)
+  params.append('start', start)
+  params.append('add-row-count', 'true')
+  return api.get<OrdersResponse>(`/objednavka-prijata?${params.toString()}`)
+}
 
 export const fetchOrder = (orderId: string) =>
   api.get<OrderDetailResponse>(`/objednavka-prijata/${orderId}`)

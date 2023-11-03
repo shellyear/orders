@@ -16,6 +16,7 @@ export type OrderData = {
 export type OrdersResponse = {
   winstrom: {
     '@version': string
+    '@rowCount': string // number in fact
     'objednavka-prijata': OrderData[]
   }
 }
