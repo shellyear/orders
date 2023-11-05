@@ -6,7 +6,9 @@ export function extractOrderDetail(orderDetail: OrderDetail) {
     ? `https://demo.flexibee.eu/c/demo/objednavka-prijata/${orderDetail.id}.pdf`
     : undefined
   return {
+    kod: orderDetail.kod,
     uzivatel: orderDetail['uzivatel@showAs'] || orderDetail.uzivatel,
+    sumCelkem: orderDetail.sumCelkem,
     kontaktJmeno: orderDetail.kontaktJmeno,
     mesto: orderDetail.mesto,
     stat: orderDetail['stat@showAs'] || orderDetail.stat,

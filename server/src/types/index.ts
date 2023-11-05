@@ -27,6 +27,7 @@ export type OrderDetail = {
   uzivatel: string
   'uzivatel@showAs': string
   kod: string
+  sumCelkem: string
   kontaktJmeno: string
   mesto: string
   stat: string // 'code:CZ'
@@ -57,5 +58,13 @@ export type OrderDetailResponse = {
   winstrom: {
     '@version': string
     'objednavka-prijata': [OrderDetail]
+  }
+}
+
+export type OrdersByFilterResponse = {
+  winstrom: {
+    '@version': string
+    'objednavka-prijata': OrderDetail[]
+    '@rowCount': string
   }
 }

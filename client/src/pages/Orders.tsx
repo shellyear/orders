@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { OrderType } from "../types/orders";
-import { fetchOrders } from "../api";
+import { fetchOrders, fetchOrdersByFilter } from "../api";
 import { Order } from "../components/Order";
 import { Paginator, usePagination } from "../components/Paginator";
 import { useParams } from "react-router-dom";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { Select } from "../components/Select";
+import { SearchBar } from "../components/SearchBar";
 
 const tableHeaderItems = [
   "Uzivatel",
@@ -25,6 +27,9 @@ function Orders() {
   const [orders, setOrders] = useState<OrderType[]>();
   const { total, limit, setTotal } = usePagination(5);
 
+  const [selected, setSelected] = useState("");
+  const [searchText, setSearchText] = useState("");
+
   const currentPage = !Number.isNaN(Number(pageNumber))
     ? Number(pageNumber)
     : 1;
@@ -44,6 +49,22 @@ function Orders() {
       });
   }, [currentPage, limit, setTotal]);
 
+  const getOrdersByFilter = () => {
+    if (selected && searchText) {
+      setIsLoading(true)
+      fetchOrdersByFilter(selected, searchText).then(
+        ({ data: { orders, total } }) => {
+          setOrders(orders)
+          setTotal(total)
+          setIsLoading(false)
+        }
+      ).catch(err => {
+        setIsLoading(false)
+        console.error("Error fetching orders data by filter:", err);
+      })
+    }
+  };
+
   const TableHeaderItems = useMemo(
     () =>
       tableHeaderItems.map((title) => (
@@ -59,8 +80,18 @@ function Orders() {
       <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
         Orders
       </h1>
+      <div>total orders: {total}</div>
       <div className="flex justify-center mb-2">
         <Paginator total={total} limit={limit} currentPage={currentPage} />
+      </div>
+      <div className="flex flex-col justify-center w-full mb-4 gap-2">
+        <Select selected={selected} setSelected={setSelected} />
+        <SearchBar
+          disabled={!Boolean(selected)}
+          value={searchText}
+          onSubmit={getOrdersByFilter}
+          onChange={setSearchText}
+        />
       </div>
       <table className="table-auto border-collapse border border-slate-400">
         <thead>
