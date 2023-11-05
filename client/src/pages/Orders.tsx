@@ -1,79 +1,91 @@
-import { useEffect, useMemo, useState } from "react";
-import { OrderType } from "../types/orders";
-import { fetchOrders, fetchOrdersByFilter } from "../api";
-import { Order } from "../components/Order";
-import { Paginator, usePagination } from "../components/Paginator";
-import { useParams } from "react-router-dom";
-import { LoadingSpinner } from "../components/LoadingSpinner";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from "react";
+import {
+  FetchOrdersByFilterArgs,
+  fetchOrders,
+  fetchOrdersByFilter,
+} from "../api";
+import { Paginator } from "../components/Paginator";
+import { useNavigate, useParams } from "react-router-dom";
 import { Select } from "../components/Select";
 import { SearchBar } from "../components/SearchBar";
+import { useMutation } from "../hooks";
+import { OrdersTable } from "../components/OrdersTable";
 
-const tableHeaderItems = [
-  "Uzivatel",
-  "kod",
-  "kontaktJmeno",
-  "Facturacni udaje",
-  "Forma dopravy",
-  "Zpusob Platby",
-  "Stav",
-  "Celkova cena",
-  "Faktura",
-  "Vsechny polozky (kod, nazev)",
-];
+const limit = 10;
+
+function getTotal(ordersTotal?: number, ordersByFilterTotal?: number) {
+  const total = Number(ordersTotal) || Number(ordersByFilterTotal);
+
+  if (Number.isNaN(total)) {
+    return 0;
+  }
+
+  return total;
+}
 
 function Orders() {
   const { pageNumber } = useParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const [orders, setOrders] = useState<OrderType[]>();
-  const { total, limit, setTotal } = usePagination(5);
-
   const [selected, setSelected] = useState("");
   const [searchText, setSearchText] = useState("");
+  const navigate = useNavigate()
+  const {
+    mutate: getOrders,
+    status: ordersStatus,
+    data: ordersData,
+    reset: resetOrders,
+  } = useMutation(
+    ({ limit, skipAmount }: { limit: number; skipAmount: number }) =>
+      fetchOrders(limit, skipAmount),
+    {}
+  );
+
+  const {
+    mutate: getOrdersByFilter,
+    status: ordersByFilterStatus,
+    data: ordersByFilterData,
+    reset: resetFilteredOrders,
+  } = useMutation(
+    ({ limit, start, key, value }: FetchOrdersByFilterArgs) =>
+      fetchOrdersByFilter({
+        limit,
+        start,
+        key,
+        value,
+      }),
+    {}
+  );
 
   const currentPage = !Number.isNaN(Number(pageNumber))
     ? Number(pageNumber)
     : 1;
+  const skipAmount = currentPage > 1 ? (currentPage - 1) * limit : 0;
 
   useEffect(() => {
-    const skipAmount = currentPage > 1 ? (currentPage - 1) * limit : 0;
-    setIsLoading(true);
-    fetchOrders(limit, skipAmount)
-      .then(({ data: { orders, total } }) => {
-        setOrders(orders);
-        setTotal(total);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        console.error("Error fetching orders data:", err);
-      });
-  }, [currentPage, limit, setTotal]);
-
-  const getOrdersByFilter = () => {
-    if (selected && searchText) {
-      setIsLoading(true)
-      fetchOrdersByFilter(selected, searchText).then(
-        ({ data: { orders, total } }) => {
-          setOrders(orders)
-          setTotal(total)
-          setIsLoading(false)
-        }
-      ).catch(err => {
-        setIsLoading(false)
-        console.error("Error fetching orders data by filter:", err);
-      })
+    if (!selected) {
+      resetFilteredOrders();
+      getOrders({ limit, skipAmount });
     }
-  };
+  }, [searchText, selected, skipAmount]);
 
-  const TableHeaderItems = useMemo(
-    () =>
-      tableHeaderItems.map((title) => (
-        <th key={title} className="border border-slate-300">
-          {title}
-        </th>
-      )),
-    []
-  );
+  useEffect(() => {
+    if (selected) {
+      resetOrders();
+      getOrdersByFilter({
+        limit,
+        start: skipAmount,
+        key: selected,
+        value: searchText,
+      })
+      navigate('/orders/1')
+    }
+  }, [searchText, selected, skipAmount]);
+
+  const isLoading = [ordersStatus, ordersByFilterStatus].includes("loading");
+  const orders = ordersData?.orders
+    ? ordersData.orders
+    : ordersByFilterData?.orders;
+  const total = getTotal(ordersData?.total, ordersByFilterData?.total);
 
   return (
     <div>
@@ -81,6 +93,7 @@ function Orders() {
         Orders
       </h1>
       <div>total orders: {total}</div>
+      <p>When no option is selected, orders are not filtered</p>
       <div className="flex justify-center mb-2">
         <Paginator total={total} limit={limit} currentPage={currentPage} />
       </div>
@@ -89,25 +102,10 @@ function Orders() {
         <SearchBar
           disabled={!Boolean(selected)}
           value={searchText}
-          onSubmit={getOrdersByFilter}
           onChange={setSearchText}
         />
       </div>
-      <table className="table-auto border-collapse border border-slate-400">
-        <thead>
-          <tr>{TableHeaderItems}</tr>
-        </thead>
-        {!isLoading ? (
-          <tbody>
-            {orders &&
-              orders.map((order, i) => {
-                return <Order key={order.kod} data={order} />;
-              })}
-          </tbody>
-        ) : (
-          <LoadingSpinner />
-        )}
-      </table>
+      <OrdersTable orders={orders} isLoading={isLoading} />
     </div>
   );
 }

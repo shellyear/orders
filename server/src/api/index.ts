@@ -4,6 +4,7 @@ import {
   OrdersByFilterResponse,
   OrdersResponse,
 } from '../types'
+import { OrdersPayload } from '../controllers'
 
 const BASE_URL = process.env.API_URL || 'https://demo.flexibee.eu/c/demo'
 const api = axios.create({
@@ -26,13 +27,23 @@ export const fetchOrders = (limit: string, start: string) => {
   return api.get<OrdersResponse>(`/objednavka-prijata?${params.toString()}`)
 }
 
-export const fetchOrdersByFilter = (filter: string) => {
-  const payload = {
+type FetchOrdersByFilterArgs = OrdersPayload
+
+export const fetchOrdersByFilter = ({
+  key,
+  value,
+  limit,
+  start,
+}: FetchOrdersByFilterArgs) => {
+  const filter = `(${key} like similar '${value}')`
+  const payload = JSON.stringify({
     winstrom: {
       filter,
       detail,
+      limit,
+      start,
     },
-  }
+  })
   const params = new URLSearchParams()
   params.append('add-row-count', 'true')
   console.log('fetchOrdersByFilter', {
@@ -40,6 +51,6 @@ export const fetchOrdersByFilter = (filter: string) => {
   })
   return api.post<OrdersByFilterResponse>(
     `/objednavka-prijata/query.json?${params.toString()}`,
-    JSON.stringify(payload),
+    payload,
   )
 }

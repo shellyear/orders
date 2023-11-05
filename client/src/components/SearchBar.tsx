@@ -1,13 +1,12 @@
 import React, { Dispatch } from "react";
 
 type SearchBarProps = {
-  value: string
-  onChange: Dispatch<React.SetStateAction<string>>
-  disabled: boolean
-  onSubmit: () => void
-}
+  value: string;
+  onChange: Dispatch<React.SetStateAction<string>>;
+  disabled: boolean;
+};
 
-export const SearchBar = ({ onSubmit, onChange, value, disabled }: SearchBarProps) => {
+export const SearchBar = ({ onChange, value, disabled }: SearchBarProps) => {
   return (
     <div>
       <label
@@ -43,16 +42,6 @@ export const SearchBar = ({ onSubmit, onChange, value, disabled }: SearchBarProp
           placeholder="Search Mockups, Logos..."
           onChange={(e) => onChange(e.target.value)}
         />
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault()
-            onSubmit()
-          }}
-          className="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        >
-          Search
-        </button>
       </div>
     </div>
   );

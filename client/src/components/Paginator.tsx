@@ -10,17 +10,6 @@ function createRange(num: number) {
   return range;
 }
 
-export function usePagination(limitValue: number = 5) {
-  const [total, setTotal] = useState(0);
-  const limit = limitValue;
-
-  return {
-    total,
-    limit,
-    setTotal,
-  };
-}
-
 type PaginatorProps = {
   total: number;
   limit: number;

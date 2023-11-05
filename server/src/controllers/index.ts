@@ -3,19 +3,24 @@ import { fetchOrders, fetchOrdersByFilter } from '../api'
 import { extractOrderDetail } from '../helpers'
 import { ParamsDictionary } from 'express-serve-static-core'
 
+export type OrdersPayload = {
+  key: string
+  value: string
+  limit: number
+  start: number
+}
+
 export class OrdersController {
   constructor() {
     this.getOrders = this.getOrders.bind(this)
   }
 
   public async getOrdersByFilter(
-    req: Request<ParamsDictionary, object, { key: string; value: string }>,
+    req: Request<ParamsDictionary, object, OrdersPayload>,
     res: Response,
   ) {
     try {
-      const { key, value } = req.body
-      const filter = `(${key} like '${value}')`
-      const { data } = await fetchOrdersByFilter(filter)
+      const { data } = await fetchOrdersByFilter(req.body)
       const orders = data.winstrom['objednavka-prijata'].map(order => ({
         ...extractOrderDetail(order),
       }))
