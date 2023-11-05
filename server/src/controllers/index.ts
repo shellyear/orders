@@ -1,13 +1,7 @@
 import { Request, Response } from 'express'
-import { fetchOrders, fetchOrder, fetchOrdersByFilter } from '../api'
+import { fetchOrders, fetchOrdersByFilter } from '../api'
 import { extractOrderDetail } from '../helpers'
 import { ParamsDictionary } from 'express-serve-static-core'
-
-type OrdersInfo = {
-  id: string
-  kod: string
-  sumCelkem: string
-}
 
 export class OrdersController {
   constructor() {
@@ -36,17 +30,6 @@ export class OrdersController {
     }
   }
 
-  private getOrder = (order: OrdersInfo) =>
-    fetchOrder(order.id)
-      .then(res => res.data.winstrom['objednavka-prijata'][0])
-      .catch(error => {
-        console.error(
-          `Error fetching data for object with id ${order.id}:`,
-          (error as Error).message,
-        )
-        throw error
-      })
-
   public async getOrders(req: Request, res: Response) {
     try {
       const limit = req.query.limit as string
@@ -54,25 +37,10 @@ export class OrdersController {
 
       const allOrdersRes = await fetchOrders(limit, start)
       const { winstrom } = allOrdersRes.data
-      const ordersInfo = winstrom['objednavka-prijata'].map(
-        ({ id, kod, sumCelkem }) => ({
-          id,
-          kod,
-          sumCelkem,
-        }),
-      )
+      const orders = winstrom['objednavka-prijata']
 
-      const ordersDetailPromises = ordersInfo.map(order => this.getOrder(order))
-
-      const orderDetails = await Promise.all(ordersDetailPromises)
-      const idMap: { [x: string]: (typeof ordersInfo)[0] } = {}
-      ordersInfo.forEach(order => {
-        idMap[order.id] = order
-      })
-
-      const completeOrdersData = orderDetails.map(orderDetail => ({
+      const completeOrdersData = orders.map(orderDetail => ({
         ...extractOrderDetail(orderDetail),
-        ...idMap[orderDetail.id],
       }))
 
       res.json({

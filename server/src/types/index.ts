@@ -1,23 +1,8 @@
-export type OrderData = {
-  'external-ids'?: [string] // ['ext:OBP-ESHOP:991000001']
-  id: string // 418
-  lastUpdate: string // '2022-06-22T07:03:07.841+02:00'
-  kod: string // '210800001'
-  datVyst: string // '2021-08-06+02:00'
-  sumCelkem: string // '1429.0'
-  sumCelkemMen: string // '0.0'
-  mena: string //  'code:CZK'
-  'mena@ref': string // '/c/demo/mena/31'
-  'mena@showAs': string // 'CZK: Česká koruna'
-  firma: string
-  popis: string // 'Objednavka z eshopu č. 210800001'
-}
-
 export type OrdersResponse = {
   winstrom: {
     '@version': string
     '@rowCount': string // number in fact
-    'objednavka-prijata': OrderData[]
+    'objednavka-prijata': OrderDetail[]
   }
 }
 

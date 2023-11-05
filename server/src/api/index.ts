@@ -13,21 +13,20 @@ const api = axios.create({
   },
 })
 
+const detail =
+  'custom:kod,uzivatel,kontaktJmeno,mesto,stat,ulice,psc,ic,dic,sumCelkem,faktSouhrn,formaDopravy,formaUhradyCis,stav,polozkyObchDokladu(nazev,kod)'
+
 export const fetchOrders = (limit: string, start: string) => {
   const params = new URLSearchParams()
   params.append('limit', limit)
   params.append('start', start)
+  params.append('detail', detail)
   params.append('add-row-count', 'true')
   console.log({ URL: `${BASE_URL}/objednavka-prijata?${params.toString()}` })
   return api.get<OrdersResponse>(`/objednavka-prijata?${params.toString()}`)
 }
 
-export const fetchOrder = (orderId: string) =>
-  api.get<OrderDetailResponse>(`/objednavka-prijata/${orderId}`)
-
 export const fetchOrdersByFilter = (filter: string) => {
-  const detail =
-    'custom:kod,uzivatel,kontaktJmeno,mesto,stat,ulice,psc,ic,dic,sumCelkem,faktSouhrn,formaDopravy,formaUhradyCis,stav,polozkyObchDokladu(nazev,kod)'
   const payload = {
     winstrom: {
       filter,
